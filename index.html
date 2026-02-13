@@ -1,80 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRICELSSYNC | ULTRA FREE VAULT v2</title>
+    <title>PRICELSSYNC | REBORN</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
-        .hacker-box { border: 2px solid #0f0; padding: 20px; margin: 15px; background: rgba(0,25,0,0.9); box-shadow: 0 0 15px #0f0; }
-        input, button { background: #000; color: #0f0; border: 1px solid #0f0; padding: 12px; margin: 10px; width: 80%; }
-        button { cursor: pointer; font-weight: bold; width: auto; padding: 12px 30px; }
-        button:hover { background: #0f0; color: #000; }
-        #gallery img, #gallery video { max-width: 95%; border: 1px solid #0f0; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
-        .status-msg { color: yellow; font-size: 0.9em; }
+        body { background: #000; color: #0f0; font-family: monospace; text-align: center; }
+        .box { border: 2px solid #0f0; padding: 20px; margin: 15px; background: #001100; }
+        input, button { background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 5px; width: 80%; }
+        #gallery img, #gallery video { max-width: 90%; border: 1px solid #0f0; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="hacker-box">
-        <h1>🛰️ BABITA FREE MULTIMEDIA</h1>
-        <p>AGENT ID: PRICELSSYNC</p>
-        
-        <div style="border: 1px dashed #0f0; padding: 10px;">
-            <label>Choose Photo/Video (Max 2MB):</label><br>
-            <input type="file" id="mediaPicker" accept="image/*,video/*">
-            <button onclick="uploadNow()">UPLOAD TO BABITA</button>
-        </div>
-        
-        <p id="upStatus" class="status-msg"></p>
+    <div class="box">
+        <h1>🛰️ BABITA FREE VAULT</h1>
+        <p>AGENT: PRICELSSYNC</p>
+        <input type="file" id="mPicker" accept="image/*,video/*">
+        <button onclick="up()">UPLOAD NOW</button>
+        <p id="st"></p>
         <hr>
-        <div id="gallery">
-            <h3>📂 SYNCED MEMORIES</h3>
-            </div>
+        <div id="gallery"></div>
     </div>
-
     <script>
-        const firebaseConfig = {
+        const config = {
           apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
           databaseURL: "https://babita-vault-e7eee-default-rtdb.firebaseio.com",
           projectId: "babita-vault-e7eee",
           appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
         };
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(config);
         const db = firebase.database();
-
-        function uploadNow() {
-            const file = document.getElementById('mediaPicker').files[0];
-            if(!file) return alert("Raju, pehle file toh select karo!");
-            if(file.size > 2.5 * 1024 * 1024) return alert("File 2MB se badi hai, Free Database mana kar dega!");
-
-            const reader = new FileReader();
-            document.getElementById('upStatus').innerText = "Encoding & Syncing... ⏳";
-            
-            reader.onload = function(e) {
-                db.ref('free_media').push({
-                    content: e.target.result,
-                    type: file.type,
-                    name: file.name,
-                    timestamp: Date.now()
-                }).then(() => {
-                    document.getElementById('upStatus').innerText = "✔ SUCCESS: Saved in Vault!";
-                    document.getElementById('mediaPicker').value = "";
-                });
+        function up() {
+            const f = document.getElementById('mPicker').files[0];
+            if(!f) return alert("Select file!");
+            const r = new FileReader();
+            document.getElementById('st').innerText = "Syncing... ⏳";
+            r.onload = (e) => {
+                db.ref('free_media').push({c: e.target.result, t: f.type, n: f.name})
+                .then(() => { document.getElementById('st').innerText = "✔ SAVED!"; });
             };
-            reader.readAsDataURL(file);
+            r.readAsDataURL(f);
         }
-
-        db.ref('free_media').on('value', (snapshot) => {
-            const gal = document.getElementById('gallery');
-            gal.innerHTML = "<h3>📂 SYNCED MEMORIES</h3>";
-            snapshot.forEach((child) => {
-                const val = child.val();
-                let element = val.type.includes('image') ? 
-                    "<img src='" + val.content + "'>" : 
-                    "<video controls src='" + val.content + "'></video>";
-                gal.innerHTML += "<div style='margin-bottom:20px;'>" + element + "<p style='font-size:0.8em;'>" + val.name + "</p></div>";
+        db.ref('free_media').on('value', (s) => {
+            const g = document.getElementById('gallery'); g.innerHTML = "";
+            s.forEach((c) => {
+                const v = c.val();
+                let el = v.t.includes('image') ? "<img src='"+v.c+"'>" : "<video controls src='"+v.c+"'></video>";
+                g.innerHTML += "<div>" + el + "<p>"+v.n+"</p></div>";
             });
         });
     </script>
