@@ -2,52 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | SECURE VAULT</title>
+    <title>PRICELSSYNC | CLOUD VAULT</title>
     <style>
         body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
         button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; font-family: 'Courier New'; }
-        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 85%; box-shadow: 0 0 20px #00ff00; }
+        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 90%; box-shadow: 0 0 20px #00ff00; border-radius: 10px; }
         .active-page { display: block; }
-        .vault-item { border: 1px dashed #00ff00; padding: 10px; margin: 10px 0; }
-        input[type="file"] { color: #00ff00; margin: 10px 0; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; }
+        .file-card { border: 1px solid #00ff00; padding: 5px; font-size: 0.7em; background: rgba(0, 30, 0, 0.5); }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
     <div class="nav-buttons">
-        <button onclick="showPage('home')">MAIN</button>
-        <button onclick="showPage('terminal')">TERMINAL</button>
-        <button onclick="showPage('vault')">PRIVATE VAULT</button>
+        <button onclick="showPage('home')">HOME</button>
+        <button onclick="showPage('upload')">UPLOAD</button>
+        <button onclick="showPage('gallery')">GALLERY</button>
     </div>
 
     <div id="home" class="page active-page">
-        <h2>AGENT PRICELSSYNC</h2>
-        <p>STATUS: SECURE</p>
+        <h2>VAULT CONTROL</h2>
+        <p>IDENT: PRICELSSYNC</p>
+        <p>STATUS: CLOUD SYNC READY</p>
     </div>
 
-    <div id="terminal" class="page">
-        <h2>TERMINAL</h2>
-        <input type="password" id="pass" placeholder="ENTER CODE">
-        <button onclick="checkPass()">AUTH</button>
-        <p id="msg"></p>
+    <div id="upload" class="page">
+        <h2>☁️ CLOUD UPLOAD</h2>
+        <input type="file" id="fileInput" multiple style="color:#0f0;">
+        <br><br>
+        <button onclick="simulateUpload()">SYNC TO FIREBASE</button>
+        <p id="up-msg"></p>
     </div>
 
-    <div id="vault" class="page">
-        <h2>🔐 PRIVATE VAULT</h2>
-        <p>Upload your Secret Photos/Docs (Encrypted)</p>
-        <div class="vault-item">
-            <input type="file" id="fileInput" multiple>
-            <br>
-            <button onclick="uploadFile()">UPLOAD & LOCK</button>
+    <div id="gallery" class="page">
+        <h2>🔒 SECRET GALLERY</h2>
+        <p>Enter Master Code to View Files:</p>
+        <input type="password" id="galPass" placeholder="CODE" style="background:black; color:#0f0; border:1px solid #0f0;">
+        <button onclick="unlockGallery()">UNLOCK</button>
+        <div id="galleryContent" style="display:none;" class="gallery-grid">
+            <div class="file-card">DOC: Youth_Code.pdf</div>
+            <div class="file-card">IMG: Babita_Face.jpg</div>
+            <div class="file-card">VID: HSC_Lab.mp4</div>
         </div>
-        <div id="fileList" style="text-align: left; font-size: 0.8em;"></div>
-        <p style="color: red; font-size: 0.7em;">*Files are locally cached for security.</p>
     </div>
 
     <script>
-        // Matrix Rain
+        // Matrix Effect
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -71,20 +73,19 @@
             document.getElementById(pageId).classList.add('active-page');
         }
 
-        function uploadFile() {
-            const input = document.getElementById('fileInput');
-            const list = document.getElementById('fileList');
-            if(input.files.length > 0) {
-                for(let i=0; i<input.files.length; i++) {
-                    list.innerHTML += "<p>✔ Locked: " + input.files[i].name + " (Encrypted)</p>";
-                }
-                alert("Files Locked in Vault!");
-            }
+        function simulateUpload() {
+            const msg = document.getElementById('up-msg');
+            msg.innerHTML = "Syncing with Firebase Cloud...";
+            setTimeout(() => { msg.innerHTML = "✔ Successfully Encrypted & Saved!"; }, 2000);
         }
 
-        function checkPass() {
-            if(document.getElementById('pass').value.toUpperCase() === "PRICELSSYNC") {
-                document.getElementById('msg').innerHTML = "ACCESS GRANTED";
+        function unlockGallery() {
+            const pass = document.getElementById('galPass').value;
+            if(pass.toUpperCase() === "PRICELSSYNC") {
+                document.getElementById('galleryContent').style.display = 'grid';
+                alert("Vault Decrypted. Welcome Agent.");
+            } else {
+                alert("Intruder Alert! Access Denied.");
             }
         }
     </script>
