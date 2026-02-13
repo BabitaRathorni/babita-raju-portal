@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | CLOUD VAULT</title>
+    <title>PRICELSSYNC | FIREBASE VAULT</title>
+    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-storage-compat.js"></script>
     <style>
         body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
         .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
-        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; font-family: 'Courier New'; }
-        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 90%; box-shadow: 0 0 20px #00ff00; border-radius: 10px; }
+        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; }
+        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 90%; }
         .active-page { display: block; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; }
-        .file-card { border: 1px solid #00ff00; padding: 5px; font-size: 0.7em; background: rgba(0, 30, 0, 0.5); }
     </style>
 </head>
 <body>
@@ -23,29 +23,26 @@
     </div>
 
     <div id="home" class="page active-page">
-        <h2>VAULT CONTROL</h2>
-        <p>IDENT: PRICELSSYNC</p>
-        <p>STATUS: CLOUD SYNC READY</p>
+        <h2>VAULT STATUS: CLOUD CONNECTED</h2>
+        <p>AGENT: PRICELSSYNC</p>
+        <p id="statusText">Verifying Firebase Connection...</p>
     </div>
 
     <div id="upload" class="page">
-        <h2>☁️ CLOUD UPLOAD</h2>
-        <input type="file" id="fileInput" multiple style="color:#0f0;">
+        <h2>☁️ PERMANENT UPLOAD</h2>
+        <input type="file" id="fileInput" style="color:#0f0;">
         <br><br>
-        <button onclick="simulateUpload()">SYNC TO FIREBASE</button>
+        <button onclick="uploadToFirebase()">UPLOAD TO GOOGLE CLOUD</button>
         <p id="up-msg"></p>
     </div>
 
     <div id="gallery" class="page">
-        <h2>🔒 SECRET GALLERY</h2>
-        <p>Enter Master Code to View Files:</p>
-        <input type="password" id="galPass" placeholder="CODE" style="background:black; color:#0f0; border:1px solid #0f0;">
+        <h2>🔒 SECRET VAULT</h2>
+        <p>Enter Master Code:</p>
+        <input type="password" id="galPass" style="background:black; color:#0f0; border:1px solid #0f0;">
         <button onclick="unlockGallery()">UNLOCK</button>
-        <div id="galleryContent" style="display:none;" class="gallery-grid">
-            <div class="file-card">DOC: Youth_Code.pdf</div>
-            <div class="file-card">IMG: Babita_Face.jpg</div>
-            <div class="file-card">VID: HSC_Lab.mp4</div>
-        </div>
+        <div id="galleryContent" style="display:none; margin-top:20px;">
+             </div>
     </div>
 
     <script>
@@ -68,24 +65,43 @@
         }
         setInterval(draw, 33);
 
+        // Firebase Sync - Using your specific keys
+        const firebaseConfig = {
+          apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
+          authDomain: "babita-vault-e7eee.firebaseapp.com",
+          projectId: "babita-vault-e7eee",
+          storageBucket: "babita-vault-e7eee.firebasestorage.app",
+          messagingSenderId: "210122573945",
+          appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        document.getElementById('statusText').innerText = "CLOUD SYNC: ACTIVE ✔";
+
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById(pageId).classList.add('active-page');
         }
 
-        function simulateUpload() {
+        function uploadToFirebase() {
+            const file = document.getElementById('fileInput').files[0];
             const msg = document.getElementById('up-msg');
-            msg.innerHTML = "Syncing with Firebase Cloud...";
-            setTimeout(() => { msg.innerHTML = "✔ Successfully Encrypted & Saved!"; }, 2000);
+            if(!file) return alert("Select a file first!");
+            
+            const storageRef = storage.ref('vault/' + file.name);
+            msg.innerText = "Uploading to Firebase...";
+            
+            storageRef.put(file).then(() => {
+                msg.innerText = "✔ Saved Permanently in Cloud!";
+            }).catch(err => {
+                msg.innerText = "Error: Set Storage Rules in Firebase Console!";
+            });
         }
 
         function unlockGallery() {
-            const pass = document.getElementById('galPass').value;
-            if(pass.toUpperCase() === "PRICELSSYNC") {
-                document.getElementById('galleryContent').style.display = 'grid';
-                alert("Vault Decrypted. Welcome Agent.");
-            } else {
-                alert("Intruder Alert! Access Denied.");
+            if(document.getElementById('galPass').value.toUpperCase() === "PRICELSSYNC") {
+                document.getElementById('galleryContent').style.display = 'block';
+                document.getElementById('galleryContent').innerHTML = "<p>Vault Decrypted. Fetching Files...</p>";
             }
         }
     </script>
