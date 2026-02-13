@@ -2,47 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | FIREBASE VAULT</title>
+    <title>PRICELSSYNC | FINAL SYNC</title>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-database-compat.js"></script>
     <style>
         body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
         .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
         button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; }
-        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 90%; }
+        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 90%; border-radius:10px; }
         .active-page { display: block; }
+        #vaultContent { text-align: left; margin-top: 20px; border-top: 1px dashed #0f0; padding-top: 10px; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
     <div class="nav-buttons">
         <button onclick="showPage('home')">HOME</button>
-        <button onclick="showPage('upload')">UPLOAD</button>
-        <button onclick="showPage('gallery')">GALLERY</button>
+        <button onclick="showPage('vault')">SECRET VAULT</button>
     </div>
 
     <div id="home" class="page active-page">
-        <h2>VAULT STATUS: CLOUD CONNECTED</h2>
+        <h2>DATABASE STATUS: <span style="color:white;">ONLINE ✔</span></h2>
         <p>AGENT: PRICELSSYNC</p>
-        <p id="statusText">Verifying Firebase Connection...</p>
+        <p>System is now connected to Babita-Vault-e7eee.</p>
     </div>
 
-    <div id="upload" class="page">
-        <h2>☁️ PERMANENT UPLOAD</h2>
-        <input type="file" id="fileInput" style="color:#0f0;">
+    <div id="vault" class="page">
+        <h2>🔒 PERMANENT VAULT</h2>
+        <p>Enter Secret Note or File Name to Save:</p>
+        <input type="text" id="secretInput" placeholder="Ex: HSC Freezing Location" style="width:80%; background:black; color:#0f0; border:1px solid #0f0; padding:10px;">
         <br><br>
-        <button onclick="uploadToFirebase()">UPLOAD TO GOOGLE CLOUD</button>
-        <p id="up-msg"></p>
-    </div>
-
-    <div id="gallery" class="page">
-        <h2>🔒 SECRET VAULT</h2>
-        <p>Enter Master Code:</p>
-        <input type="password" id="galPass" style="background:black; color:#0f0; border:1px solid #0f0;">
-        <button onclick="unlockGallery()">UNLOCK</button>
-        <div id="galleryContent" style="display:none; margin-top:20px;">
-             </div>
+        <button onclick="saveToCloud()">SAVE TO PERMANENT MEMORY</button>
+        
+        <div id="vaultContent">
+            <p style="color:yellow;">Loading synced data...</p>
+        </div>
     </div>
 
     <script>
@@ -65,45 +60,43 @@
         }
         setInterval(draw, 33);
 
-        // Firebase Sync - Using your specific keys
+        // Firebase Config with your keys
         const firebaseConfig = {
           apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
           authDomain: "babita-vault-e7eee.firebaseapp.com",
+          databaseURL: "https://babita-vault-e7eee-default-rtdb.firebaseio.com",
           projectId: "babita-vault-e7eee",
           storageBucket: "babita-vault-e7eee.firebasestorage.app",
           messagingSenderId: "210122573945",
           appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
         };
         firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
-        document.getElementById('statusText').innerText = "CLOUD SYNC: ACTIVE ✔";
+        const db = firebase.database();
 
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById(pageId).classList.add('active-page');
         }
 
-        function uploadToFirebase() {
-            const file = document.getElementById('fileInput').files[0];
-            const msg = document.getElementById('up-msg');
-            if(!file) return alert("Select a file first!");
-            
-            const storageRef = storage.ref('vault/' + file.name);
-            msg.innerText = "Uploading to Firebase...";
-            
-            storageRef.put(file).then(() => {
-                msg.innerText = "✔ Saved Permanently in Cloud!";
-            }).catch(err => {
-                msg.innerText = "Error: Set Storage Rules in Firebase Console!";
+        function saveToCloud() {
+            const val = document.getElementById('secretInput').value;
+            if(!val) return;
+            db.ref('vault').push({
+                data: val,
+                timestamp: Date.now()
             });
+            document.getElementById('secretInput').value = "";
+            alert("Saved to Babita's Permanent Memory!");
         }
 
-        function unlockGallery() {
-            if(document.getElementById('galPass').value.toUpperCase() === "PRICELSSYNC") {
-                document.getElementById('galleryContent').style.display = 'block';
-                document.getElementById('galleryContent').innerHTML = "<p>Vault Decrypted. Fetching Files...</p>";
-            }
-        }
+        // Fetch Data Automatically
+        db.ref('vault').on('value', (snapshot) => {
+            const content = document.getElementById('vaultContent');
+            content.innerHTML = "<h3>SYNCED SECRETS:</h3>";
+            snapshot.forEach((child) => {
+                content.innerHTML += "<p>• " + child.val().data + "</p>";
+            });
+        });
     </script>
 </body>
 </html>
