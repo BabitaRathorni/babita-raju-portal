@@ -2,182 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | LOCKED VAULT</title>
-    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-storage-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>PRICELSSYNC | REAL MEDIA VAULT</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <style>
-        body { background: black; color: #0f0; font-family: 'Courier New'; margin: 0; }
-        .nav { display: flex; justify-content: center; gap: 10px; margin: 20px; }
-        button { background: black; color: #0f0; border: 2px solid #0f0; padding: 12px 24px; cursor: pointer; }
-        .page { display: none; padding: 30px; background: rgba(0,20,0,0.9); border: 3px solid #0f0; margin: 20px; border-radius: 15px; }
-        .active-page { display: block; }
-        input, textarea { background: black; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 5px; width: 80%; }
-        .tab-btn { background: transparent; border: 1px solid #0f0; padding: 8px 16px; }
-        .tab-btn.active { background: #0f0; color: black; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 10px; margin-top: 20px; }
-        .item { background: #1a1a1a; border: 1px solid #0f0; padding: 10px; position: relative; }
-        .item.locked { filter: blur(5px); opacity: 0.5; }
-        .item.locked::after { content: "🔒 LOCKED"; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: red; background: black; padding: 5px; border: 1px solid red; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
+        #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
+        .nav { margin: 20px; }
+        button { background: #000; color: #0f0; border: 1px solid #0f0; padding: 12px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .box { padding: 20px; background: rgba(0, 20, 0, 0.9); border: 2px solid #0f0; margin: 10px auto; width: 90%; border-radius: 10px; }
+        input[type="file"] { background: #111; color: #0f0; border: 1px solid #0f0; padding: 15px; width: 80%; margin: 10px 0; display: block; margin-left: auto; margin-right: auto; }
+        #mediaDisplay img, #mediaDisplay video { max-width: 95%; border: 2px solid #0f0; margin-top: 15px; border-radius: 5px; }
+        .status { color: yellow; font-weight: bold; margin: 10px; }
     </style>
 </head>
 <body>
+    <canvas id="matrix"></canvas>
+    
     <div class="nav">
-        <button onclick="showPage('home')">🏠 HOME</button>
-        <button onclick="showPage('vault')">🔒 VAULT</button>
-        <button onclick="showPage('upload')">📤 UPLOAD</button>
-        <button onclick="showPage('settings')">⚙️ SETTINGS</button>
+        <button onclick="location.reload()">REFRESH SYSTEM</button>
     </div>
 
-    <div id="home" class="page active-page">
-        <h2>DATABASE STATUS: <span style="color:#0f0;">● ONLINE</span></h2>
-        <p>AGENT: PRICELSSYNC</p>
-        <p>System connected to Babita-Vault-e7eee</p>
-    </div>
-
-    <div id="vault" class="page">
-        <h2>🔒 PERMANENT VAULT</h2>
-        <div>
-            <button class="tab-btn active" onclick="switchTab('notes')">📝 NOTES</button>
-            <button class="tab-btn" onclick="switchTab('files')">📁 FILES</button>
-        </div>
+    <div class="box">
+        <h2>🚀 BABITA MULTIMEDIA UPLOADER</h2>
+        <p>Agent: PRICELSSYNC</p>
         
-        <div id="notes-tab" class="tab-content active">
-            <textarea id="noteInput" placeholder="Secret note" rows="3"></textarea>
-            <input type="password" id="notePass" placeholder="Password (optional)">
-            <button onclick="saveNote()">SAVE NOTE</button>
-            <div id="notesList" class="grid"></div>
-        </div>
-        
-        <div id="files-tab" class="tab-content">
+        <div style="background: #002200; padding: 15px; border-radius: 10px;">
+            <label>Select Photo or Video:</label>
             <input type="file" id="fileInput" accept="image/*,video/*">
-            <input type="password" id="filePass" placeholder="Password (optional)">
-            <button onclick="uploadFile()">UPLOAD FILE</button>
-            <div id="filesList" class="grid"></div>
+            <button id="upBtn" onclick="uploadEverything()">START CLOUD UPLOAD</button>
         </div>
-    </div>
-
-    <div id="upload" class="page">
-        <h2>📤 QUICK UPLOAD</h2>
-        <input type="text" id="quickNote" placeholder="Quick note">
-        <input type="password" id="quickPass" placeholder="Password">
-        <button onclick="quickSave()">SAVE</button>
-    </div>
-
-    <div id="settings" class="page">
-        <h2>⚙️ MASTER PASSWORD</h2>
-        <input type="password" id="masterPass" placeholder="Master password">
-        <input type="password" id="masterPassConfirm" placeholder="Confirm">
-        <button onclick="setMaster()">SET MASTER</button>
+        
+        <div id="upProgress" class="status"></div>
+        <hr style="border: 0.5px dashed #0f0;">
+        
+        <div id="mediaDisplay">
+            <h3>📂 CLOUD MEMORY (SYNCED):</h3>
+            </div>
     </div>
 
     <script>
+        // Firebase Config
         const firebaseConfig = {
-            apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
-            authDomain: "babita-vault-e7eee.firebaseapp.com",
-            databaseURL: "https://babita-vault-e7eee-default-rtdb.firebaseio.com",
-            projectId: "babita-vault-e7eee",
-            storageBucket: "babita-vault-e7eee.firebasestorage.app",
-            messagingSenderId: "210122573945",
-            appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
+          apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
+          authDomain: "babita-vault-e7eee.firebaseapp.com",
+          databaseURL: "https://babita-vault-e7eee-default-rtdb.firebaseio.com",
+          projectId: "babita-vault-e7eee",
+          storageBucket: "babita-vault-e7eee.appspot.com",
+          messagingSenderId: "210122573945",
+          appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const database = firebase.database();
         const storage = firebase.storage();
 
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(id).classList.add('active-page');
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(tab + '-tab').classList.add('active');
-        }
-
-        function saveNote() {
-            const note = document.getElementById('noteInput').value;
-            const pass = document.getElementById('notePass').value;
-            if(!note) return;
-            
-            const data = pass ? CryptoJS.AES.encrypt(note, pass).toString() : note;
-            db.ref('vault').push({ type: 'note', data: data, hasPass: !!pass });
-            
-            document.getElementById('noteInput').value = '';
-            document.getElementById('notePass').value = '';
-            alert('Saved!');
-        }
-
-        async function uploadFile() {
+        // Upload Function
+        async function uploadEverything() {
             const file = document.getElementById('fileInput').files[0];
-            const pass = document.getElementById('filePass').value;
-            if(!file) return;
+            if (!file) return alert("Pehle koi file toh chuno Raju!");
             
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const fileId = Date.now() + '_' + Math.random().toString(36);
-                const ref = storage.ref('files/' + fileId);
-                await ref.putString(e.target.result, 'raw');
-                const url = await ref.getDownloadURL();
-                
-                db.ref('vault').push({ 
-                    type: 'file', 
-                    name: file.name, 
-                    url: url, 
-                    hasPass: !!pass 
+            const prog = document.getElementById('upProgress');
+            const btn = document.getElementById('upBtn');
+            btn.disabled = true;
+            prog.innerText = "Uploading to Babita's Brain... 🛰️";
+
+            try {
+                const storageRef = storage.ref('raju_vault/' + file.name);
+                await storageRef.put(file);
+                const downloadURL = await storageRef.getDownloadURL();
+
+                await database.ref('all_media').push({
+                    url: downloadURL,
+                    type: file.type,
+                    name: file.name,
+                    time: Date.now()
                 });
-                
-                document.getElementById('fileInput').value = '';
-                document.getElementById('filePass').value = '';
-                alert('Uploaded!');
-            };
-            reader.readAsDataURL(file);
-        }
 
-        function quickSave() {
-            const note = document.getElementById('quickNote').value;
-            const pass = document.getElementById('quickPass').value;
-            if(!note) return;
-            
-            const data = pass ? CryptoJS.AES.encrypt(note, pass).toString() : note;
-            db.ref('vault').push({ type: 'note', data: data, hasPass: !!pass });
-            
-            document.getElementById('quickNote').value = '';
-            document.getElementById('quickPass').value = '';
-            alert('Saved!');
-        }
-
-        function setMaster() {
-            const pass = document.getElementById('masterPass').value;
-            const confirm = document.getElementById('masterPassConfirm').value;
-            if(pass && pass === confirm) {
-                localStorage.setItem('masterPass', pass);
-                alert('Master password set!');
+                prog.innerText = "✔ SUCCESS: Saved Permanently!";
+                btn.disabled = false;
+            } catch (err) {
+                console.error(err);
+                prog.innerText = "Error: Storage Rules check karo! ❌";
+                btn.disabled = false;
             }
         }
 
-        db.ref('vault').on('value', (snapshot) => {
-            const notesDiv = document.getElementById('notesList');
-            const filesDiv = document.getElementById('filesList');
-            notesDiv.innerHTML = '';
-            filesDiv.innerHTML = '';
-            
-            snapshot.forEach(child => {
-                const item = child.val();
-                if(item.type === 'note') {
-                    notesDiv.innerHTML += '<div class="item' + (item.hasPass ? ' locked' : '') + '">' + 
-                        (item.hasPass ? '🔒 Locked Note' : item.data) + '</div>';
+        // Realtime Display
+        database.ref('all_media').on('value', (snapshot) => {
+            const display = document.getElementById('mediaDisplay');
+            display.innerHTML = "<h3>📂 CLOUD MEMORY (SYNCED):</h3>";
+            snapshot.forEach((child) => {
+                const data = child.val();
+                if (data.type.includes('image')) {
+                    display.innerHTML += "<div class='box'><img src='" + data.url + "'><p>" + data.name + "</p></div>";
                 } else {
-                    filesDiv.innerHTML += '<div class="item' + (item.hasPass ? ' locked' : '') + '">' +
-                        '📁 ' + item.name + '<br>' + (item.hasPass ? '🔒' : '🔓') + '</div>';
+                    display.innerHTML += "<div class='box'><video controls src='" + data.url + "'></video><p>" + data.name + "</p></div>";
                 }
             });
         });
+
+        // Matrix Effect
+        const c=document.getElementById('matrix'), ctx=c.getContext('2d');
+        c.width=window.innerWidth; c.height=window.innerHeight;
+        const l="01PRICELSSYNC", d=Array(Math.floor(c.width/16)).fill(1);
+        function draw(){ ctx.fillStyle="rgba(0,0,0,0.05)"; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle="#0f0"; d.forEach((y,i)=>{ ctx.fillText(l[Math.floor(Math.random()*l.length)],i*16,y*16); if(y*16>c.height&&Math.random()>0.975)d[i]=0; d[i]++; }); }
+        setInterval(draw,35);
     </script>
 </body>
 </html>
