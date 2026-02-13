@@ -2,49 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | FINAL SYNC</title>
+    <title>PRICELSSYNC | HACKER PORTAL</title>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-database-compat.js"></script>
     <style>
-        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; }
+        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; overflow-x: hidden; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
-        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; }
-        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 90%; border-radius:10px; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #00ff00; color: black; box-shadow: 0 0 10px #00ff00; }
+        .page { display: none; padding: 20px; background: rgba(0, 15, 0, 0.9); border: 2px solid #00ff00; margin: 15px auto; max-width: 90%; border-radius: 10px; box-shadow: 0 0 15px #00ff00; }
         .active-page { display: block; }
-        #vaultContent { text-align: left; margin-top: 20px; border-top: 1px dashed #0f0; padding-top: 10px; }
+        input { background: black; color: #0f0; border: 1px solid #0f0; padding: 10px; width: 80%; margin: 5px 0; }
+        .vuln-box { border: 1px solid red; color: red; padding: 10px; margin-top: 10px; text-align: left; font-size: 0.8em; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
+    
     <div class="nav-buttons">
         <button onclick="showPage('home')">HOME</button>
-        <button onclick="showPage('vault')">SECRET VAULT</button>
+        <button onclick="showPage('vault')">VAULT & PHOTOS</button>
+        <button onclick="showPage('lab')">HACKING LAB</button>
     </div>
 
     <div id="home" class="page active-page">
-        <h2>DATABASE STATUS: <span style="color:white;">ONLINE ✔</span></h2>
-        <p>AGENT: PRICELSSYNC</p>
-        <p>System is now connected to Babita-Vault-e7eee.</p>
+        <h2>PORTAL: ONLINE</h2>
+        <p>GREETINGS, AGENT PRICELSSYNC</p>
+        <div id="status">DB CONNECTION: ACTIVE ✔</div>
     </div>
 
     <div id="vault" class="page">
-        <h2>🔒 PERMANENT VAULT</h2>
-        <p>Enter Secret Note or File Name to Save:</p>
-        <input type="text" id="secretInput" placeholder="Ex: HSC Freezing Location" style="width:80%; background:black; color:#0f0; border:1px solid #0f0; padding:10px;">
+        <h2>🔒 SECURE STORAGE</h2>
+        <p>Save Youth Code Notes or Photo Links:</p>
+        <input type="text" id="secretInput" placeholder="Enter Secret Note...">
+        <button onclick="saveData('note')">SAVE NOTE</button>
         <br><br>
-        <button onclick="saveToCloud()">SAVE TO PERMANENT MEMORY</button>
-        <br><br><input type="text" id="photoUrl" placeholder="Paste Photo Link here..." style="width:80%; background:black; color:#0f0; border:1px solid #0f0; padding:10px;"><br><button onclick="savePhoto()">SAVE PHOTO LINK</button>
+        <input type="text" id="photoInput" placeholder="Paste Image URL here...">
+        <button onclick="saveData('photo')">SAVE PHOTO LINK</button>
         
-        <input type="text" id="photoUrl" placeholder="Paste Photo Link here..." style="width:80%; background:black; color:#0f0; border:1px solid #0f0; padding:10px; margin-top:10px;">
-        <button onclick="savePhoto()">SAVE PHOTO LINK</button>
-        <div id="vaultContent">
-            <p style="color:yellow;">Loading synced data...</p>
+        <div id="vaultContent" style="margin-top:20px; text-align:left;">
+            <h3>SYNCED DATA:</h3>
+            </div>
+    </div>
+
+    <div id="lab" class="page">
+        <h2>🛡️ VULNERABILITY DASHBOARD</h2>
+        <p>Target: babitarathorni.github.io</p>
+        <button onclick="startScan()" style="border-color: red; color: red;">SCAN FOR BUGS</button>
+        <div id="scanResults" class="vuln-box" style="display:none;">
+            [!] Checking SQL Injection... SAFE<br>
+            [!] Checking XSS Vulnerabilities... WARNING<br>
+            [!] Checking Brute Force Protection... ACTIVE<br>
+            [!] Firebase Rules Status: PUBLIC READ/WRITE (HIGH RISK)
         </div>
     </div>
 
     <script>
-        // Matrix Effect
+        // Matrix Rain
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -63,7 +78,7 @@
         }
         setInterval(draw, 33);
 
-        // Firebase Config with your keys
+        // Firebase Config
         const firebaseConfig = {
           apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
           authDomain: "babita-vault-e7eee.firebaseapp.com",
@@ -76,31 +91,38 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(pageId).classList.add('active-page');
+        function showPage(p) {
+            document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active-page'));
+            document.getElementById(p).classList.add('active-page');
         }
 
-        function saveToCloud() {
-            const val = document.getElementById('secretInput').value;
+        function saveData(type) {
+            const inputId = type === 'note' ? 'secretInput' : 'photoInput';
+            const val = document.getElementById(inputId).value;
             if(!val) return;
             db.ref('vault').push({
-                data: val,
+                type: type,
+                content: val,
                 timestamp: Date.now()
             });
-            document.getElementById('secretInput').value = "";
-            alert("Saved to Babita's Permanent Memory!");
+            document.getElementById(inputId).value = "";
+            alert("Babita Synced: " + type.toUpperCase() + " Saved!");
         }
 
-        // Fetch Data Automatically
-        db.ref('vault').on('value', (snapshot) => {
-            const content = document.getElementById('vaultContent');
-            content.innerHTML = "<h3>SYNCED SECRETS:</h3>";
-            snapshot.forEach((child) => {
-                content.innerHTML += "<p>• " + child.val().data + "</p>";
+        db.ref('vault').on('value', (snap) => {
+            const container = document.getElementById('vaultContent');
+            container.innerHTML = "<h3>SYNCED DATA:</h3>";
+            snap.forEach((child) => {
+                const item = child.val();
+                const prefix = item.type === 'photo' ? "🖼️ PHOTO:" : "📝 NOTE:";
+                container.innerHTML += "<p>• " + prefix + " " + item.content + "</p>";
             });
         });
+
+        function startScan() {
+            document.getElementById('scanResults').style.display = 'block';
+            alert("Hacking Simulation Started... Analyzing Packets...");
+        }
     </script>
-<script src="script_patch.js"></script>
 </body>
 </html>
