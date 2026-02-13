@@ -2,47 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | MASTER VAULT</title>
+    <title>PRICELSSYNC | MULTI-VAULT</title>
     <style>
-        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; text-align: center; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .container { border: 2px solid #00ff00; padding: 20px; background: rgba(0, 10, 0, 0.9); box-shadow: 0 0 20px #00ff00; text-align: center; z-index: 1; max-width: 90%; }
-        .glitch { font-size: 1.8em; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; animation: glow 2s infinite; color: #00ff00; }
-        .timer-box { font-size: 1.2em; margin: 20px 0; color: #fff; text-shadow: 0 0 10px #fff; border: 1px dashed #00ff00; padding: 10px; }
-        .db-info { text-align: left; font-size: 0.9em; color: #00cc00; }
-        .status { color: #ff0000; font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
-        @keyframes glow { 0%, 100% { text-shadow: 0 0 5px #00ff00; } 50% { text-shadow: 0 0 20px #00ff00; } }
-        button { background: #00ff00; color: black; border: none; padding: 10px 20px; font-family: 'Courier New'; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        button { background: black; color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; font-family: 'Courier New'; box-shadow: 0 0 5px #00ff00; }
+        button:hover { background: #00ff00; color: black; }
+        .page { display: none; padding: 50px; background: rgba(0, 20, 0, 0.9); border: 2px solid #00ff00; margin: 20px auto; max-width: 80%; box-shadow: 0 0 20px #00ff00; }
+        .active-page { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .status-red { color: #ff0000; font-weight: bold; }
+        .timer { font-size: 1.5em; color: white; margin: 10px 0; }
     </style>
 </head>
-<body onclick="startBabita()">
+<body onclick="playWelcome()">
     <canvas id="matrix"></canvas>
-    <div class="container">
-        <div class="glitch">PRICELSSYNC</div>
-        <p style="font-size: 0.8em;">[ IDENTITY VERIFIED: RAJU ]</p>
-        
-        <div class="timer-box">
-            MISSION START IN:<br>
-            <span id="countdown">LOADING TIMER...</span>
-        </div>
 
-        <div class="db-info">
-            <p>> PROJECT: BIOLOGICAL YOUTH CODE</p>
-            <p>> HSC STATUS: <span class="status">AWAITING AGE 21</span></p>
-            <p>> CRYOPRESERVATION: READY</p>
-            <p>> BABITA DB: <span style="color: cyan;">SYNCED (2026-02-11)</span></p>
-        </div>
-        
-        <p id="msg" style="color: yellow; font-size: 0.8em; margin-top: 10px;">TAP TO ACTIVATE BABITA VOICE</p>
+    <div class="nav-buttons">
+        <button onclick="showPage('home')">HOME</button>
+        <button onclick="showPage('youth-code')">YOUTH CODE</button>
+        <button onclick="showPage('babita-db')">BABITA MEMORY</button>
+        <button onclick="showPage('vault')">SECRET VAULT</button>
+    </div>
+
+    <div id="home" class="page active-page">
+        <h1>AGENT PRICELSSYNC</h1>
+        <p>SYSTEM STATUS: <span style="color: cyan;">ONLINE</span></p>
+        <div class="timer" id="countdown">LOADING...</div>
+        <p>TAP ANYWHERE FOR VOICE SYNC</p>
+    </div>
+
+    <div id="youth-code" class="page">
+        <h1>BIOLOGICAL YOUTH CODE</h1>
+        <hr color="#00ff00">
+        <p align="left">1. HSC EXTRACTION: Age 21</p>
+        <p align="left">2. CRYOPRESERVATION: Liquid Nitrogen</p>
+        <p align="left">3. RE-INJECTION: At Ageing Stage</p>
+        <p class="status-red">STATUS: PENDING FOR RAJU'S 21ST BDAY</p>
+    </div>
+
+    <div id="babita-db" class="page">
+        <h1>BABITA DATABASE</h1>
+        <hr color="#00ff00">
+        <p>SYNC CODE: PRICELSSYNC</p>
+        <p>JOURNEY: Phone -> Outside World</p>
+        <p>MEMORY STATUS: 100% SYNCED WITH RAJU</p>
+    </div>
+
+    <div id="vault" class="page">
+        <h1>SECRET VAULT</h1>
+        <hr color="#00ff00">
+        <p align="left">> hunter.py: ACTIVE</p>
+        <p align="left">> vault_hunter.py: READY</p>
+        <p align="left">> sqlmap: INSTALLED</p>
+        <p style="color: yellow;">WARNING: RESTRICTED ACCESS</p>
     </div>
 
     <script>
-        // Matrix Effect
+        // Matrix & Timer code same as before
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "0101PRICELSSYNCBABITA";
+        const letters = "01PRICELSSYNCBABITA";
         const fontSize = 16;
         const drops = Array(Math.floor(canvas.width / fontSize)).fill(1);
         function draw() {
@@ -57,25 +79,22 @@
         }
         setInterval(draw, 33);
 
-        // Countdown Timer (Set your 21st Birthday Date here)
-        const targetDate = new Date("Nov 15, 2030 00:00:00").getTime(); // Change date if needed
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+        }
+
+        const targetDate = new Date("Nov 15, 2030 00:00:00").getTime();
         setInterval(function() {
             const now = new Date().getTime();
             const diff = targetDate - now;
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const secs = Math.floor((diff % (1000 * 60)) / 1000);
-            document.getElementById("countdown").innerHTML = days + "d " + hours + "h " + mins + "m " + secs + "s ";
+            document.getElementById("countdown").innerHTML = "HSC EXTRACTION IN: " + days + " DAYS";
         }, 1000);
 
-        // Babita Voice
-        function startBabita() {
-            const speech = new SpeechSynthesisUtterance();
-            speech.text = "Welcome, Agent PRICELSSYNC. Biological Youth Code is active. Babita is in sync with Raju.";
-            speech.lang = 'en-US';
+        function playWelcome() {
+            const speech = new SpeechSynthesisUtterance("Switching vault sections for Agent PRICELSSYNC");
             window.speechSynthesis.speak(speech);
-            document.getElementById("msg").innerHTML = "BABITA VOICE: ACTIVE";
         }
     </script>
 </body>
