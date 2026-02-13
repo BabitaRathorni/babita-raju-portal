@@ -2,128 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | FINAL SYNC 🔒 LOCKED</title>
+    <title>PRICELSSYNC | LOCKED VAULT</title>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; }
-        #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 2px solid #00ff00; padding: 12px 24px; cursor: pointer; font-weight: bold; border-radius: 5px; transition: all 0.3s; }
-        button:hover { background: #00ff00; color: black; box-shadow: 0 0 20px #0f0; }
-        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 3px solid #00ff00; margin: 20px auto; max-width: 95%; border-radius: 15px; box-shadow: 0 0 30px rgba(0,255,0,0.3); }
+        body { background: black; color: #0f0; font-family: 'Courier New'; margin: 0; }
+        .nav { display: flex; justify-content: center; gap: 10px; margin: 20px; }
+        button { background: black; color: #0f0; border: 2px solid #0f0; padding: 12px 24px; cursor: pointer; }
+        .page { display: none; padding: 30px; background: rgba(0,20,0,0.9); border: 3px solid #0f0; margin: 20px; border-radius: 15px; }
         .active-page { display: block; }
-        #vaultContent { text-align: left; margin-top: 20px; border-top: 2px dashed #0f0; padding-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
-        .vault-item { background: rgba(0,30,0,0.8); border: 1px solid #0f0; border-radius: 8px; padding: 15px; position: relative; }
-        .vault-item.locked { filter: blur(3px) grayscale(50%); opacity: 0.8; pointer-events: none; }
-        .vault-item.locked::after { content: "🔒 LOCKED"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: red; font-weight: bold; background: rgba(0,0,0,0.9); padding: 5px 10px; border: 1px solid red; border-radius: 3px; }
-        input, textarea { background: black; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 5px 0; width: 80%; border-radius: 5px; font-family: 'Courier New', monospace; }
-        .lock-controls { margin-top: 10px; display: flex; gap: 5px; justify-content: center; }
-        .badge { position: absolute; top: 5px; right: 5px; padding: 3px 8px; font-size: 12px; border-radius: 3px; }
-        .badge-locked { background: rgba(255,0,0,0.7); color: white; }
-        .badge-unlocked { background: rgba(0,255,0,0.7); color: black; }
-        .toast { position: fixed; top: 20px; right: 20px; background: black; border: 2px solid #0f0; padding: 15px 25px; border-radius: 5px; z-index: 1000; animation: slideIn 0.3s; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .tab-buttons { display: flex; gap: 10px; margin: 20px 0; justify-content: center; }
-        .tab-btn { background: transparent; border: 1px solid #0f0; padding: 8px 16px; cursor: pointer; }
+        input, textarea { background: black; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 5px; width: 80%; }
+        .tab-btn { background: transparent; border: 1px solid #0f0; padding: 8px 16px; }
         .tab-btn.active { background: #0f0; color: black; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 10px; margin-top: 20px; }
+        .item { background: #1a1a1a; border: 1px solid #0f0; padding: 10px; position: relative; }
+        .item.locked { filter: blur(5px); opacity: 0.5; }
+        .item.locked::after { content: "🔒 LOCKED"; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: red; background: black; padding: 5px; border: 1px solid red; }
     </style>
 </head>
 <body>
-    <canvas id="matrix"></canvas>
-    
-    <div class="nav-buttons">
+    <div class="nav">
         <button onclick="showPage('home')">🏠 HOME</button>
-        <button onclick="showPage('vault')">🔒 SECRET VAULT</button>
+        <button onclick="showPage('vault')">🔒 VAULT</button>
         <button onclick="showPage('upload')">📤 UPLOAD</button>
-        <button onclick="showPage('settings')">🔑 SETTINGS</button>
+        <button onclick="showPage('settings')">⚙️ SETTINGS</button>
     </div>
 
-    <!-- HOME PAGE -->
     <div id="home" class="page active-page">
         <h2>DATABASE STATUS: <span style="color:#0f0;">● ONLINE</span></h2>
         <p>AGENT: PRICELSSYNC</p>
-        <p>System is now connected to Babita-Vault-e7eee.</p>
+        <p>System connected to Babita-Vault-e7eee</p>
     </div>
 
-    <!-- VAULT PAGE -->
     <div id="vault" class="page">
         <h2>🔒 PERMANENT VAULT</h2>
-        
-        <div class="tab-buttons">
+        <div>
             <button class="tab-btn active" onclick="switchTab('notes')">📝 NOTES</button>
             <button class="tab-btn" onclick="switchTab('files')">📁 FILES</button>
         </div>
         
         <div id="notes-tab" class="tab-content active">
-            <p>Enter Secret Note to Save:</p>
-            <textarea id="secretNote" rows="3" placeholder="Enter your secret note..." style="width:80%;"></textarea>
-            <br><br>
-            <input type="password" id="notePass" placeholder="Set Password (leave empty for no lock)">
-            <br><br>
-            <button onclick="saveNote()">💾 SAVE NOTE</button>
-            
-            <div id="vaultContent">
-                <p style="color:yellow;">Loading synced data...</p>
-            </div>
+            <textarea id="noteInput" placeholder="Secret note" rows="3"></textarea>
+            <input type="password" id="notePass" placeholder="Password (optional)">
+            <button onclick="saveNote()">SAVE NOTE</button>
+            <div id="notesList" class="grid"></div>
         </div>
         
         <div id="files-tab" class="tab-content">
-            <p>Upload File:</p>
             <input type="file" id="fileInput" accept="image/*,video/*">
-            <br><br>
-            <input type="password" id="filePass" placeholder="Set Password (optional)">
-            <br><br>
-            <button onclick="uploadFile()">📤 UPLOAD FILE</button>
-            
-            <div id="fileList" style="margin-top:20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px;">
-                <p>Loading files...</p>
-            </div>
+            <input type="password" id="filePass" placeholder="Password (optional)">
+            <button onclick="uploadFile()">UPLOAD FILE</button>
+            <div id="filesList" class="grid"></div>
         </div>
     </div>
 
-    <!-- UPLOAD PAGE -->
     <div id="upload" class="page">
         <h2>📤 QUICK UPLOAD</h2>
         <input type="text" id="quickNote" placeholder="Quick note">
-        <input type="password" id="quickPass" placeholder="Password (optional)">
+        <input type="password" id="quickPass" placeholder="Password">
         <button onclick="quickSave()">SAVE</button>
     </div>
 
-    <!-- SETTINGS PAGE -->
     <div id="settings" class="page">
-        <h2>🔑 SETTINGS</h2>
-        <p>Master Password:</p>
+        <h2>⚙️ MASTER PASSWORD</h2>
         <input type="password" id="masterPass" placeholder="Master password">
         <input type="password" id="masterPassConfirm" placeholder="Confirm">
-        <button onclick="setMaster()">SAVE</button>
+        <button onclick="setMaster()">SET MASTER</button>
     </div>
 
     <script>
-        // Matrix Effect
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "01PRICELSSYNCBABITA";
-        const fontSize = 16;
-        const drops = Array(Math.floor(canvas.width / fontSize)).fill(1);
-        function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#0F0"; ctx.font = fontSize + "px arial";
-            drops.forEach((y, i) => {
-                const text = letters[Math.floor(Math.random() * letters.length)];
-                ctx.fillText(text, i * fontSize, y * fontSize);
-                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }
-        setInterval(draw, 33);
-
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
             authDomain: "babita-vault-e7eee.firebaseapp.com",
@@ -137,31 +88,27 @@
         const db = firebase.database();
         const storage = firebase.storage();
 
-        function showPage(pageId) {
+        function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(pageId).classList.add('active-page');
+            document.getElementById(id).classList.add('active-page');
         }
 
-        function switchTab(tabId) {
+        function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             event.target.classList.add('active');
-            document.getElementById(tabId + '-tab').classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
         }
 
         function saveNote() {
-            const note = document.getElementById('secretNote').value;
+            const note = document.getElementById('noteInput').value;
             const pass = document.getElementById('notePass').value;
             if(!note) return;
             
-            if(pass) {
-                const encrypted = CryptoJS.AES.encrypt(note, pass).toString();
-                db.ref('vault').push({ type: 'note', data: encrypted, hasPass: true, timestamp: Date.now() });
-            } else {
-                db.ref('vault').push({ type: 'note', data: note, hasPass: false, timestamp: Date.now() });
-            }
+            const data = pass ? CryptoJS.AES.encrypt(note, pass).toString() : note;
+            db.ref('vault').push({ type: 'note', data: data, hasPass: !!pass });
             
-            document.getElementById('secretNote').value = '';
+            document.getElementById('noteInput').value = '';
             document.getElementById('notePass').value = '';
             alert('Saved!');
         }
@@ -173,27 +120,21 @@
             
             const reader = new FileReader();
             reader.onload = async function(e) {
-                let data = e.target.result;
-                if(pass) {
-                    data = CryptoJS.AES.encrypt(data, pass).toString();
-                }
-                
                 const fileId = Date.now() + '_' + Math.random().toString(36);
                 const ref = storage.ref('files/' + fileId);
-                await ref.putString(data, 'raw');
+                await ref.putString(e.target.result, 'raw');
                 const url = await ref.getDownloadURL();
                 
-                db.ref('vault').push({
-                    type: 'file',
-                    name: file.name,
-                    url: url,
-                    hasPass: !!pass,
-                    timestamp: Date.now()
+                db.ref('vault').push({ 
+                    type: 'file', 
+                    name: file.name, 
+                    url: url, 
+                    hasPass: !!pass 
                 });
                 
                 document.getElementById('fileInput').value = '';
                 document.getElementById('filePass').value = '';
-                alert('File uploaded!');
+                alert('Uploaded!');
             };
             reader.readAsDataURL(file);
         }
@@ -203,12 +144,8 @@
             const pass = document.getElementById('quickPass').value;
             if(!note) return;
             
-            if(pass) {
-                const encrypted = CryptoJS.AES.encrypt(note, pass).toString();
-                db.ref('vault').push({ type: 'note', data: encrypted, hasPass: true, timestamp: Date.now() });
-            } else {
-                db.ref('vault').push({ type: 'note', data: note, hasPass: false, timestamp: Date.now() });
-            }
+            const data = pass ? CryptoJS.AES.encrypt(note, pass).toString() : note;
+            db.ref('vault').push({ type: 'note', data: data, hasPass: !!pass });
             
             document.getElementById('quickNote').value = '';
             document.getElementById('quickPass').value = '';
@@ -224,72 +161,23 @@
             }
         }
 
-        // Load Data
         db.ref('vault').on('value', (snapshot) => {
-            const notesDiv = document.getElementById('vaultContent');
-            const filesDiv = document.getElementById('fileList');
-            
+            const notesDiv = document.getElementById('notesList');
+            const filesDiv = document.getElementById('filesList');
             notesDiv.innerHTML = '';
             filesDiv.innerHTML = '';
             
-            snapshot.forEach((child) => {
+            snapshot.forEach(child => {
                 const item = child.val();
-                const id = child.key;
-                const unlocked = sessionStorage.getItem('unlock_' + id);
-                
                 if(item.type === 'note') {
-                    const div = document.createElement('div');
-                    div.className = 'vault-item' + (item.hasPass && !unlocked ? ' locked' : '');
-                    
-                    if(item.hasPass && !unlocked) {
-                        div.innerHTML = '<div>🔒 LOCKED NOTE</div>';
-                        div.innerHTML += '<div class="lock-controls">' +
-                            '<input type="password" id="pass_' + id + '" placeholder="Pass">' +
-                            '<button onclick="unlockItem(\'' + id + '\')">UNLOCK</button>' +
-                            '</div>';
-                    } else {
-                        let data = item.data;
-                        if(unlocked && item.hasPass) {
-                            try {
-                                const pass = prompt('Enter password:');
-                                data = CryptoJS.AES.decrypt(item.data, pass).toString(CryptoJS.enc.Utf8);
-                            } catch(e) { data = 'Error decrypting'; }
-                        }
-                        div.innerHTML = '<div>' + data + '</div>';
-                    }
-                    
-                    notesDiv.appendChild(div);
-                    
-                } else if(item.type === 'file') {
-                    const div = document.createElement('div');
-                    div.className = 'vault-item' + (item.hasPass && !unlocked ? ' locked' : '');
-                    
-                    if(item.hasPass && !unlocked) {
-                        div.innerHTML = '<div>📁 ' + item.name + '<br>🔒 LOCKED</div>';
-                        div.innerHTML += '<div class="lock-controls">' +
-                            '<input type="password" id="pass_' + id + '" placeholder="Pass">' +
-                            '<button onclick="unlockItem(\'' + id + '\')">UNLOCK</button>' +
-                            '</div>';
-                    } else {
-                        div.innerHTML = '<div>📁 ' + item.name + '<br>' +
-                            (item.name.match(/\.(jpg|jpeg|png|gif|mp4|mov)$/i) ? 
-                                '<img src="' + item.url + '" style="max-width:100%; max-height:100px;">' : 
-                                '<a href="' + item.url + '" target="_blank">Download</a>') +
-                            '</div>';
-                    }
-                    
-                    filesDiv.appendChild(div);
+                    notesDiv.innerHTML += '<div class="item' + (item.hasPass ? ' locked' : '') + '">' + 
+                        (item.hasPass ? '🔒 Locked Note' : item.data) + '</div>';
+                } else {
+                    filesDiv.innerHTML += '<div class="item' + (item.hasPass ? ' locked' : '') + '">' +
+                        '📁 ' + item.name + '<br>' + (item.hasPass ? '🔒' : '🔓') + '</div>';
                 }
             });
         });
-
-        function unlockItem(id) {
-            const pass = document.getElementById('pass_' + id).value;
-            if(pass) {
-                sessionStorage.setItem('unlock_' + id, pass);
-                alert('Item unlocked for this session!');
-            }
-        }
     </script>
 </body>
 </html>
