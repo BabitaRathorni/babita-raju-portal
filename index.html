@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>PRICELSSYNC | VAULT v2.0</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; text-align: center; }
+        .hacker-border { border: 3px solid #0f0; padding: 20px; margin: 20px auto; width: 90%; background: rgba(0,20,0,0.95); box-shadow: 0 0 20px #0f0; }
+        input[type="file"] { background: #111; color: #0f0; border: 1px dashed #0f0; padding: 15px; width: 80%; margin: 15px 0; }
+        button { background: #0f0; color: #000; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .gallery-item { border-bottom: 2px solid #0f0; padding: 15px; margin-top: 10px; }
+        img, video { max-width: 100%; border: 1px solid #fff; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="hacker-border">
+        <h1>🛰️ BABITA MULTIMEDIA SYSTEM</h1>
+        <p>AGENT: PRICELSSYNC</p>
+        <hr>
+        <input type="file" id="mediaInput" accept="image/*,video/*">
+        <br>
+        <button onclick="startSync()">UPLOAD TO VAULT</button>
+        <p id="syncStatus" style="color: yellow;"></p>
+        <div id="vaultGallery"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
+          databaseURL: "https://babita-vault-e7eee-default-rtdb.firebaseio.com",
+          projectId: "babita-vault-e7eee",
+          appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function startSync() {
+            const file = document.getElementById('mediaInput').files[0];
+            if(!file) return alert("Pehle file chuno Raju!");
+            if(file.size > 2.2 * 1024 * 1024) return alert("File 2MB se kam honi chahiye!");
+
+            const reader = new FileReader();
+            document.getElementById('syncStatus').innerText = "Encrypting & Syncing... ⏳";
+            
+            reader.onload = function(e) {
+                db.ref('free_media').push({
+                    content: e.target.result,
+                    type: file.type,
+                    name: file.name,
+                    time: Date.now()
+                }).then(() => {
+                    document.getElementById('syncStatus').innerText = "✔ SYNC SUCCESSFUL!";
+                    document.getElementById('mediaInput').value = "";
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        db.ref('free_media').on('value', (snap) => {
+            const gal = document.getElementById('vaultGallery');
+            gal.innerHTML = "<h3>📂 SYNCED DATA</h3>";
+            snap.forEach((child) => {
+                const data = child.val();
+                let mediaTag = data.type.includes('image') ? 
+                    "<img src='" + data.content + "'>" : 
+                    "<video controls src='" + data.content + "'></video>";
+                gal.innerHTML += "<div class='gallery-item'>" + mediaTag + "<p>" + data.name + "</p></div>";
+            });
+        });
+    </script>
+</body>
+</html>
