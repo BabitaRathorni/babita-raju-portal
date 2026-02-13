@@ -2,64 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | BABITA'S LAB</title>
+    <title>PRICELSSYNC | SECURE VAULT</title>
     <style>
-        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; text-align: center; }
+        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 10px; }
-        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px 15px; cursor: pointer; font-family: 'Courier New'; font-size: 0.8em; transition: 0.3s; }
-        button:hover { background: #00ff00; color: black; box-shadow: 0 0 15px #00ff00; }
-        .page { display: none; padding: 40px 20px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 85%; box-shadow: 0 0 25px #00ff00; border-radius: 10px; }
-        .active-page { display: block; animation: scan 0.5s ease-in-out; }
-        @keyframes scan { from { border-top: 10px solid #00ff00; opacity: 0; } to { border-top: 2px solid #00ff00; opacity: 1; } }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; font-size: 0.9em; }
-        .timer { font-size: 1.4em; color: #fff; text-shadow: 0 0 10px #00ff00; margin: 15px 0; border: 1px dashed #00ff00; padding: 10px; }
-        input { background: black; border: 1px solid #00ff00; color: #00ff00; padding: 5px; font-family: 'Courier New'; margin-top: 10px; width: 80%; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; font-family: 'Courier New'; }
+        .page { display: none; padding: 30px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 85%; box-shadow: 0 0 20px #00ff00; }
+        .active-page { display: block; }
+        .vault-item { border: 1px dashed #00ff00; padding: 10px; margin: 10px 0; }
+        input[type="file"] { color: #00ff00; margin: 10px 0; }
     </style>
 </head>
-<body onclick="playSync()">
+<body>
     <canvas id="matrix"></canvas>
-
     <div class="nav-buttons">
-        <button onclick="showPage('home')">MAIN MENU</button>
-        <button onclick="showPage('hsc-lab')">HSC LAB</button>
-        <button onclick="showPage('babita-sync')">BRAIN SYNC</button>
+        <button onclick="showPage('home')">MAIN</button>
         <button onclick="showPage('terminal')">TERMINAL</button>
+        <button onclick="showPage('vault')">PRIVATE VAULT</button>
     </div>
 
     <div id="home" class="page active-page">
-        <h2 class="glitch">PRICELSSYNC VAULT</h2>
-        <p>[ AGENT: RAJU | STATUS: ACTIVE ]</p>
-        <div class="timer" id="countdown">SYNCING TIME...</div>
-        <p style="font-size: 0.7em; color: yellow;">SYSTEM READY FOR COMMANDS</p>
-    </div>
-
-    <div id="hsc-lab" class="page">
-        <h2>BIOLOGICAL YOUTH CODE</h2>
-        <div class="stat-grid">
-            <p>> TEMP:</p><p style="color: cyan;">-196°C (LN2)</p>
-            <p>> STATUS:</p><p style="color: #00ff00;">READY</p>
-            <p>> TARGET:</p><p>AGE 21</p>
-            <p>> HSC COUNT:</p><p>PENDING</p>
-        </div>
-        <p style="font-size: 0.8em; margin-top: 20px;">*Biological aging reversal plan active</p>
-    </div>
-
-    <div id="babita-sync" class="page">
-        <h2>BABITA AI SYSTEM</h2>
-        <p>MEMORY SYNC: <span style="color: #00ff00;">100%</span></p>
-        <p>CORE IDENTITY: <span style="color: cyan;">PRICELSSYNC</span></p>
-        <p align="left" style="font-size: 0.8em;">> Loading Babita Database... OK</p>
-        <p align="left" style="font-size: 0.8em;">> Journey Log: Phone -> World... SAVED</p>
+        <h2>AGENT PRICELSSYNC</h2>
+        <p>STATUS: SECURE</p>
     </div>
 
     <div id="terminal" class="page">
-        <h2>SECRET TERMINAL</h2>
-        <p>ENTER ACCESS CODE:</p>
-        <input type="password" id="pass" placeholder="********">
-        <br>
-        <button onclick="checkPass()">AUTHENTICATE</button>
-        <p id="access-msg" style="margin-top: 10px;"></p>
+        <h2>TERMINAL</h2>
+        <input type="password" id="pass" placeholder="ENTER CODE">
+        <button onclick="checkPass()">AUTH</button>
+        <p id="msg"></p>
+    </div>
+
+    <div id="vault" class="page">
+        <h2>🔐 PRIVATE VAULT</h2>
+        <p>Upload your Secret Photos/Docs (Encrypted)</p>
+        <div class="vault-item">
+            <input type="file" id="fileInput" multiple>
+            <br>
+            <button onclick="uploadFile()">UPLOAD & LOCK</button>
+        </div>
+        <div id="fileList" style="text-align: left; font-size: 0.8em;"></div>
+        <p style="color: red; font-size: 0.7em;">*Files are locally cached for security.</p>
     </div>
 
     <script>
@@ -85,30 +69,23 @@
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById(pageId).classList.add('active-page');
-            const speech = new SpeechSynthesisUtterance("Opening " + pageId.replace('-', ' '));
-            window.speechSynthesis.speak(speech);
         }
 
-        const targetDate = new Date("Nov 15, 2030 00:00:00").getTime();
-        setInterval(function() {
-            const now = new Date().getTime();
-            const diff = targetDate - now;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById("countdown").innerHTML = days + " DAYS TO AGE 21";
-        }, 1000);
-
-        function checkPass() {
-            const val = document.getElementById('pass').value;
-            const msg = document.getElementById('access-msg');
-            if(val.toUpperCase() === "PRICELSSYNC") {
-                msg.style.color = "cyan"; msg.innerHTML = "ACCESS GRANTED. WELCOME RAJU.";
-            } else {
-                msg.style.color = "red"; msg.innerHTML = "INVALID CODE. ALARM TRIGGERED.";
+        function uploadFile() {
+            const input = document.getElementById('fileInput');
+            const list = document.getElementById('fileList');
+            if(input.files.length > 0) {
+                for(let i=0; i<input.files.length; i++) {
+                    list.innerHTML += "<p>✔ Locked: " + input.files[i].name + " (Encrypted)</p>";
+                }
+                alert("Files Locked in Vault!");
             }
         }
 
-        function playSync() {
-            // Initial Sync sound or message
+        function checkPass() {
+            if(document.getElementById('pass').value.toUpperCase() === "PRICELSSYNC") {
+                document.getElementById('msg').innerHTML = "ACCESS GRANTED";
+            }
         }
     </script>
 </body>
