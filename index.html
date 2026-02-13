@@ -1,40 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>PRICELSSYNC | FREE MEDIA VAULT</title>
+    <title>PRICELSSYNC | 100% FREE VAULT</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
-        #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .box { padding: 20px; background: rgba(0, 20, 0, 0.9); border: 2px solid #0f0; margin: 15px auto; width: 90%; border-radius: 10px; }
-        input { background: #111; color: #0f0; border: 1px solid #0f0; padding: 12px; width: 80%; margin: 10px 0; }
-        button { background: #0f0; color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; }
-        .media-card { border: 1px solid #0f0; margin-top: 20px; padding: 10px; background: #001100; }
-        img, video { max-width: 100%; border-radius: 5px; margin-top: 10px; }
+        body { background: #000; color: #0f0; font-family: monospace; text-align: center; }
+        .box { border: 2px solid #0f0; padding: 20px; margin: 10px; background: rgba(0,20,0,0.9); }
+        input, button { margin: 10px; padding: 10px; background: #000; color: #0f0; border: 1px solid #0f0; cursor: pointer; }
+        #preview { max-width: 100%; border: 1px solid #0f0; display:none; margin: 10px auto; }
+        .media-item { border-bottom: 1px dashed #0f0; padding: 10px; }
+        img, video { max-width: 90%; margin: 10px; border: 1px solid #0f0; }
     </style>
 </head>
 <body>
-    <canvas id="matrix"></canvas>
     <div class="box">
-        <h2>🛰️ BABITA FREE STORAGE</h2>
+        <h2>🛰️ BABITA FREE MULTIMEDIA (NO CARD)</h2>
         <p>AGENT: PRICELSSYNC</p>
-        <input type="text" id="mediaUrl" placeholder="Paste Image or Video Link here...">
-        <br>
-        <button onclick="saveLink()">SAVE TO VAULT</button>
-        <div id="vaultArea"></div>
+        <input type="file" id="fileInput" accept="image/*,video/*">
+        <button onclick="uploadFree()">SAVE TO VAULT</button>
+        <p id="status"></p>
+        <div id="gallery"></div>
     </div>
 
     <script>
-        // Matrix Effect
-        const c=document.getElementById('matrix'), x=c.getContext('2d');
-        c.width=window.innerWidth; c.height=window.innerHeight;
-        const m="01PRICELSSYNC", d=Array(Math.floor(c.width/16)).fill(1);
-        function dr(){ x.fillStyle="rgba(0,0,0,0.05)"; x.fillRect(0,0,c.width,c.height); x.fillStyle="#0f0"; d.forEach((y,i)=>{ x.fillText(m[Math.floor(Math.random()*m.length)],i*16,y*16); if(y*16>c.height&&Math.random()>0.975)d[i]=0; d[i]++; }); }
-        setInterval(dr,35);
-
-        // Firebase Config
+        // Firebase Config (Sirf Database)
         const firebaseConfig = {
           apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
           databaseURL: "https://babita-vault-e7eee-default-rtdb.firebaseio.com",
@@ -44,24 +34,39 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function saveLink() {
-            const url = document.getElementById('mediaUrl').value;
-            if(!url) return;
-            const type = (url.match(/\.(mp4|webm|ogg)/i)) ? 'video' : 'image';
-            db.ref('free_vault').push({ url: url, type: type });
-            document.getElementById('mediaUrl').value = "";
+        function uploadFree() {
+            const file = document.getElementById('fileInput').files[0];
+            if(!file) return alert("Pehle file chuno!");
+            
+            // File size check (Base64 creates large strings, keep under 2MB for free DB)
+            if(file.size > 2 * 1024 * 1024) return alert("File bahut badi hai! 2MB se kam ki photo/video dalo.");
+
+            const reader = new FileReader();
+            document.getElementById('status').innerText = "Encoding... ⏳";
+            
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                db.ref('free_media').push({
+                    data: base64Data,
+                    type: file.type,
+                    name: file.name,
+                    time: Date.now()
+                }).then(() => {
+                    document.getElementById('status').innerText = "✔ Saved in Babita's Memory!";
+                });
+            };
+            reader.readAsDataURL(file);
         }
 
-        db.ref('free_vault').on('value', (snap) => {
-            const area = document.getElementById('vaultArea');
-            area.innerHTML = "<h3>📂 SYNCED FILES:</h3>";
+        db.ref('free_media').on('value', (snap) => {
+            const gal = document.getElementById('gallery');
+            gal.innerHTML = "<h3>SYNCED MEMORIES:</h3>";
             snap.forEach((child) => {
-                const data = child.val();
-                let html = "<div class='media-card'>";
-                if(data.type === 'video') html += "<video controls src='"+data.url+"'></video>";
-                else html += "<img src='"+data.url+"'>";
-                html += "</div>";
-                area.innerHTML += html;
+                const d = child.val();
+                let content = d.type.includes('image') ? 
+                    "<img src='"+d.data+"'>" : 
+                    "<video controls src='"+d.data+"'></video>";
+                gal.innerHTML += "<div class='media-item'>" + content + "<p>"+d.name+"</p></div>";
             });
         });
     </script>
