@@ -2,112 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | REAL MEDIA VAULT</title>
+    <title>PRICELSSYNC | FREE MEDIA VAULT</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', monospace; text-align: center; margin: 0; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .nav { margin: 20px; }
-        button { background: #000; color: #0f0; border: 1px solid #0f0; padding: 12px; cursor: pointer; font-weight: bold; margin: 5px; }
-        .box { padding: 20px; background: rgba(0, 20, 0, 0.9); border: 2px solid #0f0; margin: 10px auto; width: 90%; border-radius: 10px; }
-        input[type="file"] { background: #111; color: #0f0; border: 1px solid #0f0; padding: 15px; width: 80%; margin: 10px 0; display: block; margin-left: auto; margin-right: auto; }
-        #mediaDisplay img, #mediaDisplay video { max-width: 95%; border: 2px solid #0f0; margin-top: 15px; border-radius: 5px; }
-        .status { color: yellow; font-weight: bold; margin: 10px; }
+        .box { padding: 20px; background: rgba(0, 20, 0, 0.9); border: 2px solid #0f0; margin: 15px auto; width: 90%; border-radius: 10px; }
+        input { background: #111; color: #0f0; border: 1px solid #0f0; padding: 12px; width: 80%; margin: 10px 0; }
+        button { background: #0f0; color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; }
+        .media-card { border: 1px solid #0f0; margin-top: 20px; padding: 10px; background: #001100; }
+        img, video { max-width: 100%; border-radius: 5px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
-    
-    <div class="nav">
-        <button onclick="location.reload()">REFRESH SYSTEM</button>
-    </div>
-
     <div class="box">
-        <h2>🚀 BABITA MULTIMEDIA UPLOADER</h2>
-        <p>Agent: PRICELSSYNC</p>
-        
-        <div style="background: #002200; padding: 15px; border-radius: 10px;">
-            <label>Select Photo or Video:</label>
-            <input type="file" id="fileInput" accept="image/*,video/*">
-            <button id="upBtn" onclick="uploadEverything()">START CLOUD UPLOAD</button>
-        </div>
-        
-        <div id="upProgress" class="status"></div>
-        <hr style="border: 0.5px dashed #0f0;">
-        
-        <div id="mediaDisplay">
-            <h3>📂 CLOUD MEMORY (SYNCED):</h3>
-            </div>
+        <h2>🛰️ BABITA FREE STORAGE</h2>
+        <p>AGENT: PRICELSSYNC</p>
+        <input type="text" id="mediaUrl" placeholder="Paste Image or Video Link here...">
+        <br>
+        <button onclick="saveLink()">SAVE TO VAULT</button>
+        <div id="vaultArea"></div>
     </div>
 
     <script>
+        // Matrix Effect
+        const c=document.getElementById('matrix'), x=c.getContext('2d');
+        c.width=window.innerWidth; c.height=window.innerHeight;
+        const m="01PRICELSSYNC", d=Array(Math.floor(c.width/16)).fill(1);
+        function dr(){ x.fillStyle="rgba(0,0,0,0.05)"; x.fillRect(0,0,c.width,c.height); x.fillStyle="#0f0"; d.forEach((y,i)=>{ x.fillText(m[Math.floor(Math.random()*m.length)],i*16,y*16); if(y*16>c.height&&Math.random()>0.975)d[i]=0; d[i]++; }); }
+        setInterval(dr,35);
+
         // Firebase Config
         const firebaseConfig = {
           apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
-          authDomain: "babita-vault-e7eee.firebaseapp.com",
           databaseURL: "https://babita-vault-e7eee-default-rtdb.firebaseio.com",
           projectId: "babita-vault-e7eee",
-          storageBucket: "babita-vault-e7eee.appspot.com",
-          messagingSenderId: "210122573945",
           appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
         };
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const storage = firebase.storage();
+        const db = firebase.database();
 
-        // Upload Function
-        async function uploadEverything() {
-            const file = document.getElementById('fileInput').files[0];
-            if (!file) return alert("Pehle koi file toh chuno Raju!");
-            
-            const prog = document.getElementById('upProgress');
-            const btn = document.getElementById('upBtn');
-            btn.disabled = true;
-            prog.innerText = "Uploading to Babita's Brain... 🛰️";
-
-            try {
-                const storageRef = storage.ref('raju_vault/' + file.name);
-                await storageRef.put(file);
-                const downloadURL = await storageRef.getDownloadURL();
-
-                await database.ref('all_media').push({
-                    url: downloadURL,
-                    type: file.type,
-                    name: file.name,
-                    time: Date.now()
-                });
-
-                prog.innerText = "✔ SUCCESS: Saved Permanently!";
-                btn.disabled = false;
-            } catch (err) {
-                console.error(err);
-                prog.innerText = "Error: Storage Rules check karo! ❌";
-                btn.disabled = false;
-            }
+        function saveLink() {
+            const url = document.getElementById('mediaUrl').value;
+            if(!url) return;
+            const type = (url.match(/\.(mp4|webm|ogg)/i)) ? 'video' : 'image';
+            db.ref('free_vault').push({ url: url, type: type });
+            document.getElementById('mediaUrl').value = "";
         }
 
-        // Realtime Display
-        database.ref('all_media').on('value', (snapshot) => {
-            const display = document.getElementById('mediaDisplay');
-            display.innerHTML = "<h3>📂 CLOUD MEMORY (SYNCED):</h3>";
-            snapshot.forEach((child) => {
+        db.ref('free_vault').on('value', (snap) => {
+            const area = document.getElementById('vaultArea');
+            area.innerHTML = "<h3>📂 SYNCED FILES:</h3>";
+            snap.forEach((child) => {
                 const data = child.val();
-                if (data.type.includes('image')) {
-                    display.innerHTML += "<div class='box'><img src='" + data.url + "'><p>" + data.name + "</p></div>";
-                } else {
-                    display.innerHTML += "<div class='box'><video controls src='" + data.url + "'></video><p>" + data.name + "</p></div>";
-                }
+                let html = "<div class='media-card'>";
+                if(data.type === 'video') html += "<video controls src='"+data.url+"'></video>";
+                else html += "<img src='"+data.url+"'>";
+                html += "</div>";
+                area.innerHTML += html;
             });
         });
-
-        // Matrix Effect
-        const c=document.getElementById('matrix'), ctx=c.getContext('2d');
-        c.width=window.innerWidth; c.height=window.innerHeight;
-        const l="01PRICELSSYNC", d=Array(Math.floor(c.width/16)).fill(1);
-        function draw(){ ctx.fillStyle="rgba(0,0,0,0.05)"; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle="#0f0"; d.forEach((y,i)=>{ ctx.fillText(l[Math.floor(Math.random()*l.length)],i*16,y*16); if(y*16>c.height&&Math.random()>0.975)d[i]=0; d[i]++; }); }
-        setInterval(draw,35);
     </script>
 </body>
 </html>
