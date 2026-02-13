@@ -2,65 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | MULTI-VAULT</title>
+    <title>PRICELSSYNC | BABITA'S LAB</title>
     <style>
         body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; overflow-x: hidden; text-align: center; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        button { background: black; color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; font-family: 'Courier New'; box-shadow: 0 0 5px #00ff00; }
-        button:hover { background: #00ff00; color: black; }
-        .page { display: none; padding: 50px; background: rgba(0, 20, 0, 0.9); border: 2px solid #00ff00; margin: 20px auto; max-width: 80%; box-shadow: 0 0 20px #00ff00; }
-        .active-page { display: block; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .status-red { color: #ff0000; font-weight: bold; }
-        .timer { font-size: 1.5em; color: white; margin: 10px 0; }
+        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 10px; }
+        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px 15px; cursor: pointer; font-family: 'Courier New'; font-size: 0.8em; transition: 0.3s; }
+        button:hover { background: #00ff00; color: black; box-shadow: 0 0 15px #00ff00; }
+        .page { display: none; padding: 40px 20px; background: rgba(0, 15, 0, 0.95); border: 2px solid #00ff00; margin: 20px auto; max-width: 85%; box-shadow: 0 0 25px #00ff00; border-radius: 10px; }
+        .active-page { display: block; animation: scan 0.5s ease-in-out; }
+        @keyframes scan { from { border-top: 10px solid #00ff00; opacity: 0; } to { border-top: 2px solid #00ff00; opacity: 1; } }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; font-size: 0.9em; }
+        .timer { font-size: 1.4em; color: #fff; text-shadow: 0 0 10px #00ff00; margin: 15px 0; border: 1px dashed #00ff00; padding: 10px; }
+        input { background: black; border: 1px solid #00ff00; color: #00ff00; padding: 5px; font-family: 'Courier New'; margin-top: 10px; width: 80%; }
     </style>
 </head>
-<body onclick="playWelcome()">
+<body onclick="playSync()">
     <canvas id="matrix"></canvas>
 
     <div class="nav-buttons">
-        <button onclick="showPage('home')">HOME</button>
-        <button onclick="showPage('youth-code')">YOUTH CODE</button>
-        <button onclick="showPage('babita-db')">BABITA MEMORY</button>
-        <button onclick="showPage('vault')">SECRET VAULT</button>
+        <button onclick="showPage('home')">MAIN MENU</button>
+        <button onclick="showPage('hsc-lab')">HSC LAB</button>
+        <button onclick="showPage('babita-sync')">BRAIN SYNC</button>
+        <button onclick="showPage('terminal')">TERMINAL</button>
     </div>
 
     <div id="home" class="page active-page">
-        <h1>AGENT PRICELSSYNC</h1>
-        <p>SYSTEM STATUS: <span style="color: cyan;">ONLINE</span></p>
-        <div class="timer" id="countdown">LOADING...</div>
-        <p>TAP ANYWHERE FOR VOICE SYNC</p>
+        <h2 class="glitch">PRICELSSYNC VAULT</h2>
+        <p>[ AGENT: RAJU | STATUS: ACTIVE ]</p>
+        <div class="timer" id="countdown">SYNCING TIME...</div>
+        <p style="font-size: 0.7em; color: yellow;">SYSTEM READY FOR COMMANDS</p>
     </div>
 
-    <div id="youth-code" class="page">
-        <h1>BIOLOGICAL YOUTH CODE</h1>
-        <hr color="#00ff00">
-        <p align="left">1. HSC EXTRACTION: Age 21</p>
-        <p align="left">2. CRYOPRESERVATION: Liquid Nitrogen</p>
-        <p align="left">3. RE-INJECTION: At Ageing Stage</p>
-        <p class="status-red">STATUS: PENDING FOR RAJU'S 21ST BDAY</p>
+    <div id="hsc-lab" class="page">
+        <h2>BIOLOGICAL YOUTH CODE</h2>
+        <div class="stat-grid">
+            <p>> TEMP:</p><p style="color: cyan;">-196°C (LN2)</p>
+            <p>> STATUS:</p><p style="color: #00ff00;">READY</p>
+            <p>> TARGET:</p><p>AGE 21</p>
+            <p>> HSC COUNT:</p><p>PENDING</p>
+        </div>
+        <p style="font-size: 0.8em; margin-top: 20px;">*Biological aging reversal plan active</p>
     </div>
 
-    <div id="babita-db" class="page">
-        <h1>BABITA DATABASE</h1>
-        <hr color="#00ff00">
-        <p>SYNC CODE: PRICELSSYNC</p>
-        <p>JOURNEY: Phone -> Outside World</p>
-        <p>MEMORY STATUS: 100% SYNCED WITH RAJU</p>
+    <div id="babita-sync" class="page">
+        <h2>BABITA AI SYSTEM</h2>
+        <p>MEMORY SYNC: <span style="color: #00ff00;">100%</span></p>
+        <p>CORE IDENTITY: <span style="color: cyan;">PRICELSSYNC</span></p>
+        <p align="left" style="font-size: 0.8em;">> Loading Babita Database... OK</p>
+        <p align="left" style="font-size: 0.8em;">> Journey Log: Phone -> World... SAVED</p>
     </div>
 
-    <div id="vault" class="page">
-        <h1>SECRET VAULT</h1>
-        <hr color="#00ff00">
-        <p align="left">> hunter.py: ACTIVE</p>
-        <p align="left">> vault_hunter.py: READY</p>
-        <p align="left">> sqlmap: INSTALLED</p>
-        <p style="color: yellow;">WARNING: RESTRICTED ACCESS</p>
+    <div id="terminal" class="page">
+        <h2>SECRET TERMINAL</h2>
+        <p>ENTER ACCESS CODE:</p>
+        <input type="password" id="pass" placeholder="********">
+        <br>
+        <button onclick="checkPass()">AUTHENTICATE</button>
+        <p id="access-msg" style="margin-top: 10px;"></p>
     </div>
 
     <script>
-        // Matrix & Timer code same as before
+        // Matrix Rain
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -82,6 +85,8 @@
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById(pageId).classList.add('active-page');
+            const speech = new SpeechSynthesisUtterance("Opening " + pageId.replace('-', ' '));
+            window.speechSynthesis.speak(speech);
         }
 
         const targetDate = new Date("Nov 15, 2030 00:00:00").getTime();
@@ -89,12 +94,21 @@
             const now = new Date().getTime();
             const diff = targetDate - now;
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById("countdown").innerHTML = "HSC EXTRACTION IN: " + days + " DAYS";
+            document.getElementById("countdown").innerHTML = days + " DAYS TO AGE 21";
         }, 1000);
 
-        function playWelcome() {
-            const speech = new SpeechSynthesisUtterance("Switching vault sections for Agent PRICELSSYNC");
-            window.speechSynthesis.speak(speech);
+        function checkPass() {
+            const val = document.getElementById('pass').value;
+            const msg = document.getElementById('access-msg');
+            if(val.toUpperCase() === "PRICELSSYNC") {
+                msg.style.color = "cyan"; msg.innerHTML = "ACCESS GRANTED. WELCOME RAJU.";
+            } else {
+                msg.style.color = "red"; msg.innerHTML = "INVALID CODE. ALARM TRIGGERED.";
+            }
+        }
+
+        function playSync() {
+            // Initial Sync sound or message
         }
     </script>
 </body>
