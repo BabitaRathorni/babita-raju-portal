@@ -2,83 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PRICELSSYNC | HACKER PORTAL</title>
+    <title>PRICELSSYNC | MULTIMEDIA VAULT</title>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-storage-compat.js"></script>
     <style>
-        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; overflow-x: hidden; }
+        body { background: black; color: #00ff00; font-family: 'Courier New', monospace; margin: 0; text-align: center; }
         #matrix { position: fixed; top: 0; left: 0; z-index: -1; }
-        .nav-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-        button { background: rgba(0,0,0,0.8); color: #00ff00; border: 1px solid #00ff00; padding: 10px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #00ff00; color: black; box-shadow: 0 0 10px #00ff00; }
-        .page { display: none; padding: 20px; background: rgba(0, 15, 0, 0.9); border: 2px solid #00ff00; margin: 15px auto; max-width: 90%; border-radius: 10px; box-shadow: 0 0 15px #00ff00; }
-        .active-page { display: block; }
-        input { background: black; color: #0f0; border: 1px solid #0f0; padding: 10px; width: 80%; margin: 5px 0; }
-        .vuln-box { border: 1px solid red; color: red; padding: 10px; margin-top: 10px; text-align: left; font-size: 0.8em; }
+        .nav { margin: 20px; display: flex; justify-content: center; gap: 10px; }
+        button { background: black; color: #0f0; border: 1px solid #0f0; padding: 10px; cursor: pointer; font-weight: bold; }
+        .box { display: none; padding: 20px; background: rgba(0, 20, 0, 0.9); border: 2px solid #0f0; margin: 20px auto; width: 85%; border-radius: 10px; }
+        .show { display: block; }
+        input[type="file"] { border: 1px dashed #0f0; padding: 10px; margin: 10px 0; width: 80%; color: #0f0; }
+        #mediaList img, #mediaList video { max-width: 100%; border: 1px solid #0f0; margin-top: 10px; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
-    
-    <div class="nav-buttons">
-        <button onclick="showPage('home')">HOME</button>
-        <button onclick="showPage('vault')">VAULT & PHOTOS</button>
-        <button onclick="showPage('lab')">HACKING LAB</button>
+    <div class="nav">
+        <button onclick="op('h')">HOME</button>
+        <button onclick="op('v')">MEDIA VAULT</button>
+        <button onclick="op('l')">HACK LAB</button>
     </div>
 
-    <div id="home" class="page active-page">
-        <h2>PORTAL: ONLINE</h2>
-        <p>GREETINGS, AGENT PRICELSSYNC</p>
-        <div id="status">DB CONNECTION: ACTIVE ✔</div>
+    <div id="h" class="box show">
+        <h2>SYSTEM: ONLINE</h2>
+        <p>AGENT: PRICELSSYNC</p>
     </div>
 
-    <div id="vault" class="page">
-        <h2>🔒 SECURE STORAGE</h2>
-        <p>Save Youth Code Notes or Photo Links:</p>
-        <input type="text" id="secretInput" placeholder="Enter Secret Note...">
-        <button onclick="saveData('note')">SAVE NOTE</button>
-        <br><br>
-        <input type="text" id="photoInput" placeholder="Paste Image URL here...">
-        <button onclick="saveData('photo')">SAVE PHOTO LINK</button>
-        
-        <div id="vaultContent" style="margin-top:20px; text-align:left;">
-            <h3>SYNCED DATA:</h3>
-            </div>
-    </div>
-
-    <div id="lab" class="page">
-        <h2>🛡️ VULNERABILITY DASHBOARD</h2>
-        <p>Target: babitarathorni.github.io</p>
-        <button onclick="startScan()" style="border-color: red; color: red;">SCAN FOR BUGS</button>
-        <div id="scanResults" class="vuln-box" style="display:none;">
-            [!] Checking SQL Injection... SAFE<br>
-            [!] Checking XSS Vulnerabilities... WARNING<br>
-            [!] Checking Brute Force Protection... ACTIVE<br>
-            [!] Firebase Rules Status: PUBLIC READ/WRITE (HIGH RISK)
+    <div id="v" class="box">
+        <h2>📤 UPLOAD PHOTO/VIDEO</h2>
+        <input type="file" id="filePicker" accept="image/*,video/*">
+        <br>
+        <button onclick="uploadMedia()">UPLOAD TO CLOUD</button>
+        <p id="upStatus"></p>
+        <div id="mediaList" style="text-align:left; margin-top:20px;">
+            <h3>SYNCED MEDIA:</h3>
         </div>
+    </div>
+
+    <div id="l" class="box">
+        <h2>🛡️ VUNVILITY</h2>
+        <button onclick="document.getElementById('r').style.display='block'">SCAN BUGS</button>
+        <div id="r" style="display:none; color:red; margin-top:10px;">[!] Vulnerability: XSS Detected in File Metadata</div>
     </div>
 
     <script>
         // Matrix Rain
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "01PRICELSSYNCBABITA";
-        const fontSize = 16;
-        const drops = Array(Math.floor(canvas.width / fontSize)).fill(1);
-        function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#0F0"; ctx.font = fontSize + "px arial";
-            drops.forEach((y, i) => {
-                const text = letters[Math.floor(Math.random() * letters.length)];
-                ctx.fillText(text, i * fontSize, y * fontSize);
-                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }
-        setInterval(draw, 33);
+        const c=document.getElementById('matrix'), x=c.getContext('2d');
+        c.width=window.innerWidth; c.height=window.innerHeight;
+        const m="01PRICELSSYNC", d=Array(Math.floor(c.width/16)).fill(1);
+        function dr(){ x.fillStyle="rgba(0,0,0,0.05)"; x.fillRect(0,0,c.width,c.height); x.fillStyle="#0f0"; d.forEach((y,i)=>{ x.fillText(m[Math.floor(Math.random()*m.length)],i*16,y*16); if(y*16>c.height&&Math.random()>0.975)d[i]=0; d[i]++; }); }
+        setInterval(dr,35);
 
-        // Firebase Config
+        // Firebase
         const firebaseConfig = {
           apiKey: "AIzaSyDfi-d5xOGUI-h2tQub__fX3HpXN3b_RaQ",
           authDomain: "babita-vault-e7eee.firebaseapp.com",
@@ -89,40 +66,33 @@
           appId: "1:210122573945:web:0ed9fde7ec8767a63f2ca8"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const db=firebase.database(), st=firebase.storage();
 
-        function showPage(p) {
-            document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active-page'));
-            document.getElementById(p).classList.add('active-page');
+        function op(id){ document.querySelectorAll('.box').forEach(b=>b.classList.remove('show')); document.getElementById(id).classList.add('show'); }
+
+        async function uploadMedia() {
+            const file = document.getElementById('filePicker').files[0];
+            if(!file) return;
+            const status = document.getElementById('upStatus');
+            status.innerText = "Uploading...";
+            
+            const ref = st.ref('uploads/' + file.name);
+            await ref.put(file);
+            const url = await ref.getDownloadURL();
+            
+            db.ref('media').push({ url: url, type: file.type });
+            status.innerText = "✔ Saved to Babita's Memory!";
         }
 
-        function saveData(type) {
-            const inputId = type === 'note' ? 'secretInput' : 'photoInput';
-            const val = document.getElementById(inputId).value;
-            if(!val) return;
-            db.ref('vault').push({
-                type: type,
-                content: val,
-                timestamp: Date.now()
-            });
-            document.getElementById(inputId).value = "";
-            alert("Babita Synced: " + type.toUpperCase() + " Saved!");
-        }
-
-        db.ref('vault').on('value', (snap) => {
-            const container = document.getElementById('vaultContent');
-            container.innerHTML = "<h3>SYNCED DATA:</h3>";
-            snap.forEach((child) => {
-                const item = child.val();
-                const prefix = item.type === 'photo' ? "🖼️ PHOTO:" : "📝 NOTE:";
-                container.innerHTML += "<p>• " + prefix + " " + item.content + "</p>";
+        db.ref('media').on('value', (s) => {
+            const list = document.getElementById('mediaList');
+            list.innerHTML = "<h3>SYNCED MEDIA:</h3>";
+            s.forEach((c) => {
+                const i = c.val();
+                if(i.type.includes('image')) list.innerHTML += "<img src='"+i.url+"'>";
+                else list.innerHTML += "<video controls src='"+i.url+"'></video>";
             });
         });
-
-        function startScan() {
-            document.getElementById('scanResults').style.display = 'block';
-            alert("Hacking Simulation Started... Analyzing Packets...");
-        }
     </script>
 </body>
 </html>
